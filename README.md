@@ -8,13 +8,6 @@ pip freeze > requirements.txt
 cd .. tro ra thu muc cha
 
 
-git add requirements.txt
-git commit -m "Tạo lại requirements.txt"
-git push
-
-
-
--->
 /project_name
 │
 ├── /app                     # Thư mục chính chứa mã nguồn ứng dụng
@@ -40,20 +33,4 @@ git push
 ├── .gitignore               # Tệp để bỏ qua các file/folder không cần thiết trong Git
 └── README.md                # Hướng dẫn sử dụng dự án
 
-/project_name
-│
-├── /app
-│   ├── __init__.py      # Khởi tạo ứng dụng Flask
-│   ├── routes.py        # Các API endpoint
-│   ├── models.py        # Các model
-│   ├── db_init.py       # Khởi tạo cơ sở dữ liệu
-│   └── utils.py         # Các hàm tiện ích
-│
-├── /migrations          # Chứa các tệp SQL
-│   ├── schema.sql       # Câu lệnh SQL để tạo bảng
-│   └── seed.sql         # Dữ liệu mẫu ban đầu
-│
-├── app.py               # Điểm chạy chính của ứng dụng Flask
-├── run_sql.py           # Script để thực thi các tệp SQL
-├── requirements.txt     # Danh sách thư viện Python
-└── .gitignore           # Bỏ qua tệp không cần thiết
+-->
