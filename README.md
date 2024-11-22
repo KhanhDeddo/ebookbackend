@@ -3,8 +3,8 @@ python -m venv venv
 source venv/Scripts/activate
 pip install flask
 pip install flask_sqlalchemy
-pip freeze > requirements.txt
 pip install flask-cors
+pip freeze > requirements.txt
 cd .. tro ra thu muc cha
 
 
