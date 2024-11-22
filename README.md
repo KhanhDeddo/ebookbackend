@@ -1,10 +1,19 @@
 <!-- 
 python -m venv venv
 source venv/Scripts/activate
-pip install Flask
+pip install flask
+pip install flask_sqlalchemy
 pip freeze > requirements.txt
 pip install flask-cors
 cd .. tro ra thu muc cha
+
+
+git add requirements.txt
+git commit -m "Tạo lại requirements.txt"
+git push
+
+
+
 -->
 /project_name
 │
