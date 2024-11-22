@@ -1,10 +1,8 @@
-from flask import Flask
+from flask_cors import CORS
+from app import create_app
 
-app = Flask(__name__)
+app = create_app()
+CORS(app)  # Cho phép tất cả các nguồn truy cập API
 
-@app.route('/')
-def hello_world():
-    return 'Hello, World!'
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
