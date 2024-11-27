@@ -6,7 +6,6 @@ db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
-
     # Đảm bảo đường dẫn tới cơ sở dữ liệu là chính xác
     import os
 
