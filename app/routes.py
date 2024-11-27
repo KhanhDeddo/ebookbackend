@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify
 from app import db
-from .models import Book, User, Order
+from flask import request
+from .models import Book, User, Order, CartShop
 api_bp = Blueprint('api', __name__)
 
 # Route cho trang chủ
@@ -49,3 +50,60 @@ def get_orders_by_user_id(user_id):
     if not order:
         return jsonify({"error": "Book not found"}), 404  # Trả về lỗi nếu không tìm thấy sách
     return jsonify(order.to_dict()), 200  # Trả về thông tin sách dưới dạng JSON
+
+@api_bp.route('/carts',methods=['GET'])
+def get_cart_items():
+    cartItems = CartShop.query.all()
+    cartItems_list = [items.to_dict() for items in cartItems]
+    if not cartItems:
+         return jsonify({"error": "Book not found"}), 404 
+    return jsonify(cartItems_list), 200
+
+@api_bp.route('/carts/<int:user_id>', methods=['GET'])
+def get_user_cart(user_id):
+    cart_items = CartShop.query.filter_by(user_id=user_id).all()
+    if not cart_items:
+        return jsonify({"error": "No items found for this user"}), 404
+    return jsonify([item.to_dict() for item in cart_items]), 200
+
+@api_bp.route('/carts/<int:user_id>/<int:book_id>', methods=['DELETE'])
+def delete_cart_item(user_id, book_id):
+    cart_item = CartShop.query.filter_by(user_id=user_id, book_id=book_id).first()
+    if not cart_item:
+        return jsonify({"error": "Cart item not found"}), 404
+    db.session.delete(cart_item)
+    db.session.commit()
+    return jsonify({"message": "Item deleted successfully"}), 200
+@api_bp.route('/carts', methods=['POST'])
+def add_or_update_cart_item():
+    # Lấy dữ liệu từ request JSON
+    data = request.get_json()
+    user_id = data.get('user_id')
+    book_id = data.get('book_id')
+    quantity = data.get('quantity', 1)
+
+    # Kiểm tra thông tin hợp lệ
+    if not user_id or not book_id:
+        return jsonify({"error": "Missing user_id or book_id"}), 400
+
+    try:
+        # Tìm kiếm mục giỏ hàng có sẵn
+        cart_item = CartShop.query.filter_by(user_id=user_id, book_id=book_id).first()
+
+        if cart_item:
+            # Nếu mục đã tồn tại, cập nhật số lượng
+            cart_item.quantity += quantity
+            cart_item.added_at = db.func.current_timestamp()
+            message = "Cart item updated successfully"
+        else:
+            # Nếu mục chưa tồn tại, thêm mục mới
+            cart_item = CartShop(user_id=user_id, book_id=book_id, quantity=quantity)
+            db.session.add(cart_item)
+            message = "Cart item added successfully"
+
+        # Lưu thay đổi vào database
+        db.session.commit()
+        return jsonify({"message": message, "cart_item": cart_item.to_dict()}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500

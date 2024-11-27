@@ -102,12 +102,32 @@ class OrderItem(db.Model):
             "total_price": str(self.total_price)
         }
 
+# class CartShop(db.Model):
+#     __tablename__ = 'Cart_Shop'
+
+#     cart_id = db.Column(db.Integer, primary_key=True, autoincrement=True)  # Khóa chính tự động tăng
+#     user_id = db.Column(db.Integer, db.ForeignKey('Users.user_id'), nullable=False)  # Khóa ngoại liên kết với Users
+#     book_id = db.Column(db.Integer, db.ForeignKey('Books.book_id'), nullable=False)  # Khóa ngoại liên kết với Books
+#     quantity = db.Column(db.Integer, nullable=False, default=1)  # Số lượng sách trong giỏ
+#     added_at = db.Column(db.DateTime, default=db.func.current_timestamp())  # Thời gian thêm vào giỏ
+
+#     # Mối quan hệ với bảng User và Book
+#     user = db.relationship('User', backref=db.backref('cart_shop', lazy=True))
+#     book = db.relationship('Book', backref=db.backref('cart_shop', lazy=True))
+
+#     def to_dict(self):
+#         return {
+#             "cart_id": self.cart_id,
+#             "user_id": self.user_id,
+#             "book_id": self.book_id,
+#             "quantity": self.quantity,
+#             "added_at": self.added_at
+#         }
 class CartShop(db.Model):
     __tablename__ = 'Cart_Shop'
 
-    cart_id = db.Column(db.Integer, primary_key=True, autoincrement=True)  # Khóa chính tự động tăng
-    user_id = db.Column(db.Integer, db.ForeignKey('Users.user_id'), nullable=False)  # Khóa ngoại liên kết với Users
-    book_id = db.Column(db.Integer, db.ForeignKey('Books.book_id'), nullable=False)  # Khóa ngoại liên kết với Books
+    user_id = db.Column(db.Integer, db.ForeignKey('Users.user_id'), primary_key=True)  # Khóa chính
+    book_id = db.Column(db.Integer, db.ForeignKey('Books.book_id'), primary_key=True)  # Khóa chính
     quantity = db.Column(db.Integer, nullable=False, default=1)  # Số lượng sách trong giỏ
     added_at = db.Column(db.DateTime, default=db.func.current_timestamp())  # Thời gian thêm vào giỏ
 
@@ -117,10 +137,10 @@ class CartShop(db.Model):
 
     def to_dict(self):
         return {
-            "cart_id": self.cart_id,
             "user_id": self.user_id,
             "book_id": self.book_id,
             "quantity": self.quantity,
             "added_at": self.added_at
         }
+
 
