@@ -25,7 +25,7 @@ VALUES
 -- (1, 2, 1, 9.99, 9.99),
 -- (2, 3, 1, 12.99, 12.99);
 
-INSERT INTO Cart (user_id, quantity, total_amount)
+INSERT INTO Carts (user_id, quantity, total_amount)
 VALUES 
 ( 1, 2, 500000),
 ( 2, 1, 500000);

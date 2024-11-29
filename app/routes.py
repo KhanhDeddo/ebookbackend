@@ -3,6 +3,9 @@ from app import db
 from flask import request
 from .models import Book, User, Order, Cart,CartItem
 api_bp = Blueprint('api', __name__)
+
+def error_response(message, status_code):
+    return jsonify({"error": message}), status_code
 # ----------------------------------------------------------------------------------
 # Route cho trang chủ
 @api_bp.route('/', methods=['GET'])
@@ -12,9 +15,82 @@ def home():
 #Route để lấy danh sách người dùng
 @api_bp.route('/users', methods=['GET'])
 def get_users():
-    users = User.query.all()  # Lấy tất cả người dùng từ cơ sở dữ liệu
-    users_list = [user.to_dict() for user in users]  # Chuyển mỗi user thành dict
-    return jsonify(users_list), 200
+    users = User.query.all()
+    if not users:
+        return jsonify([]), 200
+    return jsonify([user.to_dict() for user in users]), 200
+# ----------------------------------------------------------------------------------
+# Route tạo người dùng mới
+@api_bp.route('/users', methods=['POST'])
+def create_user():
+    """
+    Tạo người dùng mới từ dữ liệu JSON gửi lên.
+    """
+    data = request.get_json()  # Lấy dữ liệu JSON từ client
+    try:
+        # Tạo đối tượng User mới
+        new_user = User(
+            user_name=data['user_name'],
+            user_email=data['user_email'],
+            user_phone=data['user_phone'],
+            user_password=data['user_password'],  # Mã hóa mật khẩu nếu cần
+            user_date_of_birth=data['user_date_of_birth'],
+            user_gender=data['user_gender'],
+            user_address=data['user_address'],
+            user_is_admin=data.get('user_is_admin', False)  # Mặc định là người dùng thường
+        )
+        db.session.add(new_user)  # Thêm vào session
+        db.session.commit()  # Lưu vào database
+        return jsonify(new_user.to_dict()), 201  # Trả về thông tin người dùng mới
+    except Exception as e:
+        db.session.rollback()  # Hủy bỏ nếu có lỗi
+        return jsonify({"error": f"Failed to create user: {str(e)}"}), 400
+# ----------------------------------------------------------------------------------
+# Route cập nhật thông tin người dùng theo ID
+@api_bp.route('/users/<int:user_id>', methods=['PUT'])
+def update_user(user_id):
+    """
+    Cập nhật thông tin người dùng dựa vào ID.
+    """
+    data = request.get_json()  # Lấy dữ liệu JSON từ client
+    user = User.query.get(user_id)  # Tìm người dùng theo ID
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    try:
+        # Cập nhật thông tin người dùng
+        user.user_name = data.get('user_name', user.user_name)
+        user.user_email = data.get('user_email', user.user_email)
+        user.user_phone = data.get('user_phone', user.user_phone)
+        user.user_password = data.get('user_password', user.user_password)  # Cập nhật mật khẩu nếu cần
+        user.user_date_of_birth = data.get('user_date_of_birth', user.user_date_of_birth)
+        user.user_gender = data.get('user_gender', user.user_gender)
+        user.user_address = data.get('user_address', user.user_address)
+        user.user_is_admin = data.get('user_is_admin', user.user_is_admin)
+
+        db.session.commit()  # Lưu thay đổi vào database
+        return jsonify(user.to_dict()), 200  # Trả về thông tin người dùng sau khi cập nhật
+    except Exception as e:
+        db.session.rollback()  # Hủy bỏ nếu có lỗi
+        return jsonify({"error": f"Failed to update user: {str(e)}"}), 400
+# ----------------------------------------------------------------------------------
+# Route xóa người dùng
+@api_bp.route('/users/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    """
+    Xóa người dùng dựa vào ID.
+    """
+    user = User.query.get(user_id)  # Tìm người dùng theo ID
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    try:
+        db.session.delete(user)  # Xóa người dùng
+        db.session.commit()  # Lưu thay đổi vào database
+        return jsonify({"message": "User deleted successfully"}), 200
+    except Exception as e:
+        db.session.rollback()  # Hủy bỏ nếu có lỗi
+        return jsonify({"error": f"Failed to delete user: {str(e)}"}), 400
 # ----------------------------------------------------------------------------------
 # Route để lấy danh sách sách
 @api_bp.route('/books', methods=['GET'])
@@ -33,6 +109,56 @@ def get_book_by_id(book_id):
     if not book:
         return jsonify({"error": "Book not found"}), 404  # Trả về lỗi nếu không tìm thấy sách
     return jsonify(book.to_dict()), 200  # Trả về thông tin sách dưới dạng JSON
+# ------------------------------------------------------------------------------------
+# Router để Thêm sách mới
+@api_bp.route('/books', methods=['POST'])
+def create_book():
+    data = request.get_json()  # Nhận dữ liệu JSON từ client
+    try:
+        # Tạo đối tượng sách mới
+        new_book = Book(
+            title=data['title'],
+            author=data['author'],
+            description=data.get('description', ''),
+            price=data['price'],
+            category=data['category'],
+            level_class=data['level_class'],
+            level_school=data['level_school'],
+            stock_quantity=data.get('stock_quantity', 0),
+            publisher=data['publisher']
+        )
+        db.session.add(new_book)  # Thêm sách mới vào session
+        db.session.commit()  # Lưu thay đổi vào database
+        return jsonify(new_book.to_dict()), 201  # Trả về thông tin sách vừa thêm
+    except Exception as e:
+        db.session.rollback()  # Hủy bỏ nếu có lỗi
+        return jsonify({"error": f"Failed to create book: {str(e)}"}), 400
+# -------------------------------------------------------------------------------------
+# Route để cập nhật thông tin sách
+@api_bp.route('/books/<int:book_id>', methods=['PUT'])
+def update_book(book_id):
+    data = request.get_json()  # Nhận dữ liệu JSON từ client
+    book = Book.query.get(book_id)  # Tìm sách theo ID
+    if not book:
+        return jsonify({"error": "Book not found"}), 404  # Nếu không tìm thấy sách
+
+    try:
+        # Cập nhật thông tin sách
+        book.title = data.get('title', book.title)
+        book.author = data.get('author', book.author)
+        book.description = data.get('description', book.description)
+        book.price = data.get('price', book.price)
+        book.category = data.get('category', book.category)
+        book.level_class = data.get('level_class', book.level_class)
+        book.level_school = data.get('level_school', book.level_school)
+        book.stock_quantity = data.get('stock_quantity', book.stock_quantity)
+        book.publisher = data.get('publisher', book.publisher)
+        db.session.commit()  # Lưu thay đổi vào database
+        return jsonify(book.to_dict()), 200  # Trả về thông tin sách vừa cập nhật
+    except Exception as e:
+        db.session.rollback()  # Hủy bỏ nếu có lỗi
+        return jsonify({"error": f"Failed to update book: {str(e)}"}), 400
+
 # -----------------------------------------------------------------------------------
 #Route để lấy danh sách giỏ hàng
 @api_bp.route('/carts',methods=['GET'])
@@ -40,16 +166,136 @@ def get_carts():
     carts= Cart.query.all()
     carts_list = [cart.to_dict() for cart in carts]
     if not carts:
-         return jsonify({"error": "Book not found"}), 404 
+         return jsonify({"error": "Cart not found"}), 404 
     return jsonify(carts_list), 200
+# -----------------------------------------------------------------------------------
+# Route để Thêm giỏ hàng mới
+@api_bp.route('/carts', methods=['POST'])
+def create_cart():
+    data = request.get_json()
+    try:
+        new_cart = Cart(
+            user_id=data['user_id'],
+            quantity=data.get('quantity', 0),
+            total_amount=data.get('total_amount', 0.0)
+        )
+        db.session.add(new_cart)
+        db.session.commit()
+        return jsonify(new_cart.to_dict()), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to create cart: {str(e)}"}), 400
+# -----------------------------------------------------------------------------------
+# Route để Cập nhật giỏ hàng
+@api_bp.route('/carts/<int:cart_id>', methods=['PUT'])
+def update_cart(cart_id):
+    data = request.get_json()
+    cart = Cart.query.get(cart_id)
+    if not cart:
+        return jsonify({"error": "Cart not found"}), 404
+
+    try:
+        cart.quantity = data.get('quantity', cart.quantity)
+        cart.total_amount = data.get('total_amount', cart.total_amount)
+        db.session.commit()
+        return jsonify(cart.to_dict()), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to update cart: {str(e)}"}), 400
+# -----------------------------------------------------------------------------------
+# Route để Xóa giỏ hàng
+@api_bp.route('/carts/<int:cart_id>', methods=['DELETE'])
+def delete_cart(cart_id):
+    cart = Cart.query.get(cart_id)
+    if not cart:
+        return jsonify({"error": "Cart not found"}), 404
+
+    try:
+        db.session.delete(cart)
+        db.session.commit()
+        return jsonify({"message": "Cart deleted successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to delete cart: {str(e)}"}), 400
 # -----------------------------------------------------------------------------------
 #Route để lấy giỏ hàng theo user_id
 @api_bp.route('/carts/<int:user_id>', methods=['GET'])
 def get_user_cart(user_id):
-    cart_items = Cart.query.filter_by(user_id=user_id).all()
-    if not cart_items:
-        return jsonify({"error": "No items found for this user"}), 404
+    cart = Cart.query.filter_by(user_id=user_id).first()
+    if not cart:
+        return error_response("Cart not found for this user", 404)
+    cart_items = CartItem.query.filter_by(cart_id=cart.cart_id).all()
     return jsonify([item.to_dict() for item in cart_items]), 200
+# ------------------------------------------------------------------------------------
+# Route để lấy tất cả CartItem của giỏ hàng
+@api_bp.route('/cartitems', methods=['GET'])
+def get_cart_items():
+    cart_items = CartItem.query.all()  # Lấy tất cả CartItem
+    if not cart_items:
+        return jsonify([]), 200  # Trả về danh sách rỗng nếu không có CartItem
+    return jsonify([item.to_dict() for item in cart_items]), 200  # Trả về danh sách CartItem
+
+# ------------------------------------------------------------------------------------
+# Route để lấy CartItem theo ID
+@api_bp.route('/cartitems/<int:cart_item_id>', methods=['GET'])
+def get_cart_item_by_id(cart_item_id):
+    cart_item = CartItem.query.get(cart_item_id)  # Tìm CartItem theo ID
+    if not cart_item:
+        return jsonify({"error": "Cart item not found"}), 404  # Trả về lỗi nếu không tìm thấy CartItem
+    return jsonify(cart_item.to_dict()), 200  # Trả về thông tin CartItem
+# ------------------------------------------------------------------------------------
+# Route để thêm CartItem mới vào giỏ hàng
+@api_bp.route('/cartitems', methods=['POST'])
+def create_cart_item():
+    data = request.get_json()
+    try:
+        # Tạo mới CartItem
+        new_cart_item = CartItem(
+            cart_id=data['cart_id'],  # Giỏ hàng mà CartItem thuộc về
+            book_id=data['book_id'],  # Sách trong giỏ hàng
+            quantity=data.get('quantity', 1),  # Số lượng sách trong giỏ
+            price=data['price']  # Giá mỗi sách
+        )
+        db.session.add(new_cart_item)  # Thêm CartItem vào session
+        db.session.commit()  # Lưu vào database
+        return jsonify(new_cart_item.to_dict()), 201  # Trả về thông tin CartItem mới tạo
+    except Exception as e:
+        db.session.rollback()  # Rollback nếu có lỗi
+        return jsonify({"error": f"Failed to create cart item: {str(e)}"}), 400
+# ------------------------------------------------------------------------------------
+# Route để cập nhật CartItem
+@api_bp.route('/cartitems/<int:cart_item_id>', methods=['PUT'])
+def update_cart_item(cart_item_id):
+    data = request.get_json()  # Lấy dữ liệu JSON từ client
+    cart_item = CartItem.query.get(cart_item_id)  # Tìm CartItem theo ID
+    if not cart_item:
+        return jsonify({"error": "Cart item not found"}), 404  # Trả về lỗi nếu không tìm thấy CartItem
+
+    try:
+        # Cập nhật các thuộc tính của CartItem
+        cart_item.quantity = data.get('quantity', cart_item.quantity)
+        cart_item.price = data.get('price', cart_item.price)
+        db.session.commit()  # Lưu thay đổi vào database
+        return jsonify(cart_item.to_dict()), 200  # Trả về thông tin CartItem đã cập nhật
+    except Exception as e:
+        db.session.rollback()  # Rollback nếu có lỗi
+        return jsonify({"error": f"Failed to update cart item: {str(e)}"}), 400
+
+# ------------------------------------------------------------------------------------
+# Route để xóa CartItem
+@api_bp.route('/cartitems/<int:cart_item_id>', methods=['DELETE'])
+def delete_cart_item(cart_item_id):
+    cart_item = CartItem.query.get(cart_item_id)  # Tìm CartItem theo ID
+    if not cart_item:
+        return jsonify({"error": "Cart item not found"}), 404  # Trả về lỗi nếu không tìm thấy CartItem
+
+    try:
+        db.session.delete(cart_item)  # Xóa CartItem
+        db.session.commit()  # Lưu thay đổi vào database
+        return jsonify({"message": "Cart item deleted successfully"}), 200  # Thông báo thành công
+    except Exception as e:
+        db.session.rollback()  # Rollback nếu có lỗi
+        return jsonify({"error": f"Failed to delete cart item: {str(e)}"}), 400
 # ------------------------------------------------------------------------------------
 # Route để lấy danh sách đơn hàng
 @api_bp.route('/orders', methods=['GET'])
@@ -60,52 +306,7 @@ def get_orders():
 # ------------------------------------------------------------------------------------
 @api_bp.route('/orders/<int:user_id>', methods=['GET'])
 def get_orders_by_user_id(user_id):
-    """
-    Lấy thông tin sách dựa vào ID từ cơ sở dữ liệu và trả về dưới dạng JSON.
-    """
-    order = Order.query.get(user_id)  # Tìm sách theo ID
-    if not order:
-        return jsonify({"error": "Book not found"}), 404  # Trả về lỗi nếu không tìm thấy sách
-    return jsonify(order.to_dict()), 200  # Trả về thông tin sách dưới dạng JSON
-
-# @api_bp.route('/carts/<int:user_id>/<int:book_id>', methods=['DELETE'])
-# def delete_cart_item(user_id, book_id):
-#     cart_item = CartShop.query.filter_by(user_id=user_id, book_id=book_id).first()
-#     if not cart_item:
-#         return jsonify({"error": "Cart item not found"}), 404
-#     db.session.delete(cart_item)
-#     db.session.commit()
-#     return jsonify({"message": "Item deleted successfully"}), 200
-# @api_bp.route('/cart-items', methods=['POST'])
-# def add_or_update_cart_item():
-#     # Lấy dữ liệu từ request JSON
-#     data = request.get_json()
-#     user_id = data.get('user_id')
-#     book_id = data.get('book_id')
-#     quantity = data.get('quantity', 1)
-
-#     # Kiểm tra thông tin hợp lệ
-#     if not user_id or not book_id:
-#         return jsonify({"error": "Missing user_id or book_id"}), 400
-
-#     try:
-#         # Tìm kiếm mục giỏ hàng có sẵn
-#         cart_item = CartShop.query.filter_by(user_id=user_id, book_id=book_id).first()
-
-#         if cart_item:
-#             # Nếu mục đã tồn tại, cập nhật số lượng
-#             cart_item.quantity += quantity
-#             cart_item.added_at = db.func.current_timestamp()
-#             message = "Cart item updated successfully"
-#         else:
-#             # Nếu mục chưa tồn tại, thêm mục mới
-#             cart_item = CartShop(user_id=user_id, book_id=book_id, quantity=quantity)
-#             db.session.add(cart_item)
-#             message = "Cart item added successfully"
-
-#         # Lưu thay đổi vào database
-#         db.session.commit()
-#         return jsonify({"message": message, "cart_item": cart_item.to_dict()}), 201
-#     except Exception as e:
-#         db.session.rollback()
-#         return jsonify({"error": str(e)}), 500
+    orders = Order.query.filter_by(user_id=user_id).all()
+    if not orders:
+        return error_response("No orders found for this user", 404)
+    return jsonify([order.to_dict() for order in orders]), 200

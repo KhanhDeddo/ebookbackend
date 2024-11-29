@@ -118,7 +118,7 @@ class OrderItem(db.Model):
         }
 
 class Cart(db.Model):
-    __tablename__ = 'Cart'
+    __tablename__ = 'Carts'
 
     cart_id = db.Column(db.Integer, primary_key=True, autoincrement=True)  # Khóa chính tự động tăng
     user_id = db.Column(db.Integer, db.ForeignKey('Users.user_id'), nullable=False,unique=True)  # Khóa ngoại liên kết với Users
@@ -140,13 +140,13 @@ class CartItem(db.Model):
     price_at_purchase = db.Column(db.Numeric(10, 3), nullable=False)
     added_at = db.Column(db.DateTime, default=db.func.current_timestamp())  # Thời gian thêm vào giỏ
 
-    # Mối quan hệ với bảng User và Book
-    # user = db.relationship('Cart', backref=db.backref('cart_items', lazy=True))
+    # Mối quan hệ với bảng Cart và Book
+    cart = db.relationship('Cart', backref=db.backref('cart_items', lazy=True))
     book = db.relationship('Book', backref=db.backref('cart_items', lazy=True))
 
     def to_dict(self):
         return {
-            "user_id": self.user_id,
+            "user_id": self.cart_id,
             "book_id": self.book_id,
             "quantity": self.quantity,
             "price_at_purchase":str(self.price_at_purchase),
