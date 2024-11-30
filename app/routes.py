@@ -237,12 +237,18 @@ def get_cart_items():
 
 # ------------------------------------------------------------------------------------
 # Route để lấy CartItem theo ID
-@api_bp.route('/cartitems/<int:cart_item_id>', methods=['GET'])
-def get_cart_item_by_id(cart_item_id):
-    cart_item = CartItem.query.get(cart_item_id)  # Tìm CartItem theo ID
-    if not cart_item:
-        return jsonify({"error": "Cart item not found"}), 404  # Trả về lỗi nếu không tìm thấy CartItem
-    return jsonify(cart_item.to_dict()), 200  # Trả về thông tin CartItem
+@api_bp.route('/cartitems/<int:cart_id>/<int:book_id>', methods=['GET'])
+def get_cart_item(cart_id, book_id):
+    cart_item = CartItem.query.get((cart_id, book_id))
+    if cart_item is None:
+        return jsonify({'message': 'Cart Item not found'}), 404
+    return jsonify({
+        'cart_id': cart_item.cart_id,
+        'book_id': cart_item.book_id,
+        'quantity': cart_item.quantity,
+        'price_at_purchase': str(cart_item.price_at_purchase),
+        'added_at': cart_item.added_at
+    })
 # ------------------------------------------------------------------------------------
 # Route để thêm CartItem mới vào giỏ hàng
 @api_bp.route('/cartitems', methods=['POST'])
@@ -254,7 +260,7 @@ def create_cart_item():
             cart_id=data['cart_id'],  # Giỏ hàng mà CartItem thuộc về
             book_id=data['book_id'],  # Sách trong giỏ hàng
             quantity=data.get('quantity', 1),  # Số lượng sách trong giỏ
-            price=data['price']  # Giá mỗi sách
+            price_at_purchase=data['price_at_purchase']  # Giá mỗi sách
         )
         db.session.add(new_cart_item)  # Thêm CartItem vào session
         db.session.commit()  # Lưu vào database
@@ -264,38 +270,31 @@ def create_cart_item():
         return jsonify({"error": f"Failed to create cart item: {str(e)}"}), 400
 # ------------------------------------------------------------------------------------
 # Route để cập nhật CartItem
-@api_bp.route('/cartitems/<int:cart_item_id>', methods=['PUT'])
-def update_cart_item(cart_item_id):
-    data = request.get_json()  # Lấy dữ liệu JSON từ client
-    cart_item = CartItem.query.get(cart_item_id)  # Tìm CartItem theo ID
-    if not cart_item:
-        return jsonify({"error": "Cart item not found"}), 404  # Trả về lỗi nếu không tìm thấy CartItem
+@api_bp.route('/cartitems/<int:cart_id>/<int:book_id>', methods=['PUT'])
+def update_cart_item(cart_id, book_id):
+    data = request.get_json()
+    cart_item = CartItem.query.get((cart_id, book_id))
+    if cart_item is None:
+        return jsonify({'message': 'Cart Item not found'}), 404
+    cart_item.quantity = data.get('quantity', cart_item.quantity)
+    cart_item.price_at_purchase = data.get('price_at_purchase', cart_item.price_at_purchase)
 
-    try:
-        # Cập nhật các thuộc tính của CartItem
-        cart_item.quantity = data.get('quantity', cart_item.quantity)
-        cart_item.price = data.get('price', cart_item.price)
-        db.session.commit()  # Lưu thay đổi vào database
-        return jsonify(cart_item.to_dict()), 200  # Trả về thông tin CartItem đã cập nhật
-    except Exception as e:
-        db.session.rollback()  # Rollback nếu có lỗi
-        return jsonify({"error": f"Failed to update cart item: {str(e)}"}), 400
+    db.session.commit()
+    return jsonify({'message': 'Cart item updated successfully'})
 
 # ------------------------------------------------------------------------------------
 # Route để xóa CartItem
-@api_bp.route('/cartitems/<int:cart_item_id>', methods=['DELETE'])
-def delete_cart_item(cart_item_id):
-    cart_item = CartItem.query.get(cart_item_id)  # Tìm CartItem theo ID
-    if not cart_item:
-        return jsonify({"error": "Cart item not found"}), 404  # Trả về lỗi nếu không tìm thấy CartItem
+@api_bp.route('/cartitems/<int:cart_id>/<int:book_id>', methods=['DELETE'])
+def delete_cart_item(cart_id, book_id):
+    cart_item = CartItem.query.get((cart_id, book_id))
 
-    try:
-        db.session.delete(cart_item)  # Xóa CartItem
-        db.session.commit()  # Lưu thay đổi vào database
-        return jsonify({"message": "Cart item deleted successfully"}), 200  # Thông báo thành công
-    except Exception as e:
-        db.session.rollback()  # Rollback nếu có lỗi
-        return jsonify({"error": f"Failed to delete cart item: {str(e)}"}), 400
+    if cart_item is None:
+        return jsonify({'message': 'Cart Item not found'}), 404
+
+    db.session.delete(cart_item)
+    db.session.commit()
+    return jsonify({'message': 'Cart item deleted successfully'})
+
 # ------------------------------------------------------------------------------------
 # Route để lấy danh sách đơn hàng
 @api_bp.route('/orders', methods=['GET'])

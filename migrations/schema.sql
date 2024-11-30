@@ -35,7 +35,7 @@ CREATE TABLE Orders (
     user_id INTEGER NOT NULL,                           -- Mã người dùng (khóa ngoại)
     order_date DATE NOT NULL,                           -- Ngày đặt hàng
     status TEXT NOT NULL DEFAULT 'Chờ xác nhận',        -- Trạng thái đơn hàng
-    total_price DECIMAL(10, 2) NOT NULL,                -- Tổng giá trị đơn hàng
+    total_price DECIMAL(10, 3) NOT NULL,                -- Tổng giá trị đơn hàng
     shipping_address TEXT NOT NULL,                     -- Địa chỉ giao hàng
     payment_method TEXT NOT NULL,                       -- Phương thức thanh toán
     payment_status TEXT NOT NULL,                       -- Trạng thái thanh toán
@@ -51,8 +51,8 @@ CREATE TABLE Order_Items (
     order_id INTEGER NOT NULL,                          -- Mã đơn hàng (khóa phụ)
     book_id INTEGER NOT NULL,                           -- Mã sản phẩm (khóa phụ)
     quantity INTEGER NOT NULL,                          -- Số lượng sản phẩm
-    price_per_item DECIMAL(10, 2),                      -- Giá mỗi sản phẩm
-    total_price DECIMAL(10, 2) NOT NULL,                -- Tổng giá trị của mục này (quantity * price_per_item)
+    price_per_item DECIMAL(10, 3),                      -- Giá mỗi sản phẩm
+    total_price DECIMAL(10, 3) NOT NULL,                -- Tổng giá trị của mục này (quantity * price_per_item)
     PRIMARY KEY (order_id, book_id),                    -- Đặt order_id và book_id làm khóa chính
     FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON DELETE CASCADE,
     FOREIGN KEY (book_id) REFERENCES Books(book_id) ON DELETE CASCADE
@@ -63,7 +63,7 @@ CREATE TABLE Carts (
     cart_id INTEGER PRIMARY KEY AUTOINCREMENT,          -- Mã giỏ hàng
     user_id INTEGER NOT NULL UNIQUE,                    -- Mã người dùng (khóa ngoại, đảm bảo mỗi user chỉ có một giỏ hàng)
     quantity INTEGER NOT NULL DEFAULT 0,                -- Số lượng sách trong giỏ
-    total_amount DECIMAL(10, 2) NOT NULL DEFAULT 0,     -- Tổng tiền trong giỏ
+    total_amount DECIMAL(10, 3) NOT NULL DEFAULT 0,     -- Tổng tiền trong giỏ
     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
 );
 

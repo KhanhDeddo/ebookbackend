@@ -13,15 +13,15 @@ class User(db.Model):
     user_is_admin = db.Column(db.Boolean, nullable=False)
     def to_dict(self):
         return {
-            "id": self.user_id,
-            "name": self.user_name,
-            "email": self.user_email,
-            "phone": self.user_phone,
-            "password": self.user_password, 
-            "date_of_birth": self.user_date_of_birth,
-            "gender": self.user_gender,
-            "address": self.user_address,
-            "is_admin": self.user_is_admin
+            "user_id": self.user_id,
+            "user_name": self.user_name,
+            "user_email": self.user_email,
+            "user_phone": self.user_phone,
+            "user_password": self.user_password, 
+            "user_date_of_birth": self.user_date_of_birth,
+            "user_gender": self.user_gender,
+            "user_address": self.user_address,
+            "user_is_admin": self.user_is_admin
         }
 
 class Book(db.Model):
@@ -146,7 +146,7 @@ class CartItem(db.Model):
 
     def to_dict(self):
         return {
-            "user_id": self.cart_id,
+            "cart_id": self.cart_id,
             "book_id": self.book_id,
             "quantity": self.quantity,
             "price_at_purchase":str(self.price_at_purchase),
