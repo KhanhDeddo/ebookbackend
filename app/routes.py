@@ -294,7 +294,13 @@ def delete_cart_item(cart_id, book_id):
     db.session.delete(cart_item)
     db.session.commit()
     return jsonify({'message': 'Cart item deleted successfully'})
-
+# ------------------------------------------------------------------------------------
+@api_bp.route('/cartitems/check/<int:cart_id>/<int:book_id>', methods=['GET'])
+def check_cart_item(cart_id, book_id):
+    cart_item = CartItem.query.get((cart_id, book_id))
+    if cart_item:
+        return jsonify({'exists': True}), 200
+    return jsonify({'exists': False}), 404
 # ------------------------------------------------------------------------------------
 # Route để lấy danh sách đơn hàng
 @api_bp.route('/orders', methods=['GET'])
