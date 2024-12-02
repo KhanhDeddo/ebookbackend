@@ -33,9 +33,12 @@ DROP TABLE IF EXISTS Orders;
 CREATE TABLE Orders (
     order_id INTEGER PRIMARY KEY AUTOINCREMENT,         -- Mã đơn hàng (khóa chính, tự động tăng)
     user_id INTEGER NOT NULL,                           -- Mã người dùng (khóa ngoại)
-    order_date DATE NOT NULL,                           -- Ngày đặt hàng
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,     -- Ngày đặt hàng
     status TEXT NOT NULL DEFAULT 'Chờ xác nhận',        -- Trạng thái đơn hàng
     total_price DECIMAL(10, 3) NOT NULL,                -- Tổng giá trị đơn hàng
+    recipient_name TEXT NOT NULL,                       -- Tên người nhận
+    recipient_phone TEXT NOT NULL,                      -- Số điện thoại người nhận 
+    recipient_email TEXT NOT NULL,                      -- Email người nhận
     shipping_address TEXT NOT NULL,                     -- Địa chỉ giao hàng
     payment_method TEXT NOT NULL,                       -- Phương thức thanh toán
     payment_status TEXT NOT NULL,                       -- Trạng thái thanh toán

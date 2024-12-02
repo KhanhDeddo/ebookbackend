@@ -68,9 +68,12 @@ class Order(db.Model):
     __tablename__ = 'Orders'
     order_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('Users.user_id'), nullable=False)  # Đảm bảo tên bảng là 'Users'
-    order_date = db.Column(db.Date, nullable=False)
+    order_date = db.Column(db.DateTime, default=db.func.current_timestamp())
     status = db.Column(db.String(100), nullable=False)
-    total_price = db.Column(db.Numeric(10, 2), nullable=False)
+    total_price = db.Column(db.Numeric(10, 3), nullable=False)
+    recipient_name = db.Column(db.Text, nullable=False)
+    recipient_phone = db.Column(db.Text, nullable=False)
+    recipient_email = db.Column(db.Text, nullable=False)
     shipping_address = db.Column(db.String(255), nullable=False)
     payment_method = db.Column(db.String(100), nullable=False)
     payment_status = db.Column(db.String(100), nullable=False)
@@ -86,6 +89,9 @@ class Order(db.Model):
             "order_date": self.order_date,
             "status": self.status,
             "total_price": str(self.total_price),
+            "recipient_name": self.recipient_name,
+            "recipient_phone": self.recipient_phone,
+            "recipient_email": self.recipient_email,
             "shipping_address": self.shipping_address,
             "payment_method": self.payment_method,
             "payment_status": self.payment_status,

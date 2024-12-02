@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify
 from app import db
 from flask import request
-from .models import Book, User, Order, Cart,CartItem
+from .models import Book, User, Order, Cart,CartItem,OrderItem
 api_bp = Blueprint('api', __name__)
 
 def error_response(message, status_code):
@@ -295,6 +295,7 @@ def delete_cart_item(cart_id, book_id):
     db.session.commit()
     return jsonify({'message': 'Cart item deleted successfully'})
 # ------------------------------------------------------------------------------------
+# Route kiểu tra cartItem có tồn tại hay không
 @api_bp.route('/cartitems/check/<int:cart_id>/<int:book_id>', methods=['GET'])
 def check_cart_item(cart_id, book_id):
     cart_item = CartItem.query.get((cart_id, book_id))
@@ -315,3 +316,16 @@ def get_orders_by_user_id(user_id):
     if not orders:
         return error_response("No orders found for this user", 404)
     return jsonify([order.to_dict() for order in orders]), 200
+# -------------------------------------------------------------------------------------
+@api_bp.route('/orderitems', methods=['GET'])
+def get_order_items():
+    orderItems = OrderItem.query.all()
+    ordersItems_list = [item.to_dict() for item in orderItems]
+    return jsonify(ordersItems_list),200
+@api_bp.route('/orderitems/<int:order_id>', methods=['GET'])
+def get_user_orders(order_id):
+    list_orderItems_of_order = Order.query.filter_by(order_id=order_id).first()
+    if not list_orderItems_of_order:
+        return error_response("Cart not found for this user", 404)
+    order_items = OrderItem.query.filter_by(order_id=list_orderItems_of_order.order_id).all()
+    return jsonify([item.to_dict() for item in order_items]), 200

@@ -1,6 +1,6 @@
 INSERT INTO Users (user_name, user_email, user_password, user_phone, user_date_of_birth, user_gender,user_address, user_is_admin)
 VALUES 
-('Khanh Deddo', 'khanhdeddo@gmail.com', '123456789', '1234567890', '2004-02-19', 'Nam','25/41/292 Kim Giang Hoàng Mai Hà Nội', 0),
+('Khanh Deddo', 'khanhdeddo@gmail.com', '123456789', '123456789', '2004-02-19', 'Nam','25/41/292 Kim Giang Hoàng Mai Hà Nội', 0),
 ('Admin', 'admin@gmai.com', '123456789', '1122334455', '1985-01-01', 'Nu','25/41/292 Kim Giang Hoàng Mai Hà Nội', 1);
  
 INSERT INTO Books (title, author, description, price, image_url, publication_date, category,level_class,level_school, stock_quantity, publisher)
@@ -29,3 +29,18 @@ INSERT INTO Carts (user_id, quantity, total_amount)
 VALUES 
 ( 1, 2, 500000),
 ( 2, 1, 500000);
+insert into Orders 
+(user_id,recipient_name,recipient_phone,recipient_email,shipping_address,payment_method,payment_status,total_price)
+values 
+(1,"Khanh",0345755059,"khanhdeddo@gmail.com","Ha noi","Thanh toan khi nhan hang","Chua thanh toan",9000000),
+(2,"Khanh",0345755059,"khanhdeddo@gmail.com","Ha noi","Thanh toan khi nhan hang","Chua thanh toan",9000000),
+(3,"Khanh",0345755059,"khanhdeddo@gmail.com","Ha noi","Thanh toan khi nhan hang","Chua thanh toan",9000000);
+
+insert into Order_Items
+(order_id,book_id,quantity,price_per_item,total_price)
+values
+(1,1,2,1000,2000),
+(2,2,2,1000,2000),
+(3,3,2,1000,2000),
+(1,4,2,1000,2000),
+(1,5,2,1000,2000);
