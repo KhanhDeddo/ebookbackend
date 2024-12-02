@@ -33,8 +33,7 @@ insert into Orders
 (user_id,recipient_name,recipient_phone,recipient_email,shipping_address,payment_method,payment_status,total_price)
 values 
 (1,"Khanh",0345755059,"khanhdeddo@gmail.com","Ha noi","Thanh toan khi nhan hang","Chua thanh toan",9000000),
-(2,"Khanh",0345755059,"khanhdeddo@gmail.com","Ha noi","Thanh toan khi nhan hang","Chua thanh toan",9000000),
-(3,"Khanh",0345755059,"khanhdeddo@gmail.com","Ha noi","Thanh toan khi nhan hang","Chua thanh toan",9000000);
+(2,"Khanh",0345755059,"khanhdeddo@gmail.com","Ha noi","Thanh toan khi nhan hang","Chua thanh toan",9000000);
 
 insert into Order_Items
 (order_id,book_id,quantity,price_per_item,total_price)

@@ -234,7 +234,6 @@ def get_cart_items():
     if not cart_items:
         return jsonify([]), 200  # Trả về danh sách rỗng nếu không có CartItem
     return jsonify([item.to_dict() for item in cart_items]), 200  # Trả về danh sách CartItem
-
 # ------------------------------------------------------------------------------------
 # Route để lấy CartItem theo ID
 @api_bp.route('/cartitems/<int:cart_id>/<int:book_id>', methods=['GET'])
@@ -281,7 +280,6 @@ def update_cart_item(cart_id, book_id):
 
     db.session.commit()
     return jsonify({'message': 'Cart item updated successfully'})
-
 # ------------------------------------------------------------------------------------
 # Route để xóa CartItem
 @api_bp.route('/cartitems/<int:cart_id>/<int:book_id>', methods=['DELETE'])
@@ -310,6 +308,7 @@ def get_orders():
     orders_list = [order.to_dict() for order in orders]
     return jsonify(orders_list),200
 # ------------------------------------------------------------------------------------
+# Route để lấy danh sách đơn hàng theo user_id
 @api_bp.route('/orders/<int:user_id>', methods=['GET'])
 def get_orders_by_user_id(user_id):
     orders = Order.query.filter_by(user_id=user_id).all()
@@ -317,11 +316,54 @@ def get_orders_by_user_id(user_id):
         return error_response("No orders found for this user", 404)
     return jsonify([order.to_dict() for order in orders]), 200
 # -------------------------------------------------------------------------------------
+# Route tạo đơn hàng
+@api_bp.route('/orders', methods=['POST'])
+def create_order():
+    data = request.get_json()
+    try:
+        new_order = Order(
+            user_id=data['user_id'],
+            recipient_name=data['recipient_name'],
+            recipient_phone=data['recipient_phone'],
+            recipient_email=data['recipient_email'],
+            shipping_address=data['shipping_address'],
+            payment_method=data['payment_method'],
+            total_price=data.get('total_price', 0.0),
+            status=data.get('status', 'Chờ xác nhận'),
+            payment_status=data.get('payment_status', 'Chưa thanh toán')
+        )
+        db.session.add(new_order)
+        db.session.commit()
+        return jsonify(new_order.to_dict()), 201
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error creating order: {e}") 
+        return jsonify({"error": f"Failed to create cart: {str(e)}"}), 400
+# -------------------------------------------------------------------------------------
+# Route để Cập nhật đơn hàng
+@api_bp.route('/orders/<int:cart_id>', methods=['PUT'])
+def update_order(cart_id):
+    data = request.get_json()
+    order = Order.query.get(cart_id)
+    if not order:
+        return jsonify({"error": "Cart not found"}), 404
+
+    try:
+        order.status = data.get('status', order.status)
+        db.session.commit()
+        return jsonify(order.to_dict()), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to update cart: {str(e)}"}), 400
+# -------------------------------------------------------------------------------------
+# Route để lấy danh sách OrderItems
 @api_bp.route('/orderitems', methods=['GET'])
 def get_order_items():
     orderItems = OrderItem.query.all()
     ordersItems_list = [item.to_dict() for item in orderItems]
     return jsonify(ordersItems_list),200
+# ------------------------------------------------------------------------------------
+# Route để lấy danh sách orderItems theo order_id
 @api_bp.route('/orderitems/<int:order_id>', methods=['GET'])
 def get_user_orders(order_id):
     list_orderItems_of_order = Order.query.filter_by(order_id=order_id).first()
@@ -329,3 +371,23 @@ def get_user_orders(order_id):
         return error_response("Cart not found for this user", 404)
     order_items = OrderItem.query.filter_by(order_id=list_orderItems_of_order.order_id).all()
     return jsonify([item.to_dict() for item in order_items]), 200
+# 
+# Route để thêm OrderItem mới vào Đơn hàng
+@api_bp.route('/orderitems', methods=['POST'])
+def create_order_item():
+    data = request.get_json()
+    try:
+        # Tạo mới OrderItem
+        new_cart_item = OrderItem(
+            order_id=data['order_id'],  # Đơn hàng mà orderItem thuộc vể
+            book_id=data['book_id'],  # Sách trong giỏ hàng
+            price_per_item=data['price_per_item'],#Giá sách
+            quantity=data.get('quantity', 1),  # Số lượng sách
+            total_price=data['total_price']  # Tổng tiền
+        )
+        db.session.add(new_cart_item)  # Thêm OrderItem vào session
+        db.session.commit()  # Lưu vào database
+        return jsonify(new_cart_item.to_dict()), 201  # Trả về thông tin OrderItem mới tạo
+    except Exception as e:
+        db.session.rollback()  # Rollback nếu có lỗi
+        return jsonify({"error": f"Failed to create cart item: {str(e)}"}), 400

@@ -41,7 +41,7 @@ CREATE TABLE Orders (
     recipient_email TEXT NOT NULL,                      -- Email người nhận
     shipping_address TEXT NOT NULL,                     -- Địa chỉ giao hàng
     payment_method TEXT NOT NULL,                       -- Phương thức thanh toán
-    payment_status TEXT NOT NULL,                       -- Trạng thái thanh toán
+    payment_status TEXT NOT NULL DEFAULT 'Chưa thanh toán', -- Trạng thái thanh toán
     shipping_date DATE,                                 -- Ngày vận chuyển
     delivery_date DATE,                                 -- Ngày giao hàng thành công
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,     -- Ngày tạo bản ghi
