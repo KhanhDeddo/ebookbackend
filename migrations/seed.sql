@@ -1,7 +1,7 @@
 INSERT INTO Users (user_name, user_email, user_password, user_phone, user_date_of_birth, user_gender,user_address, user_is_admin)
 VALUES 
 ('Khanh Deddo', 'khanhdeddo@gmail.com', '123456789', '123456789', '2004-02-19', 'Nam','25/41/292 Kim Giang Hoàng Mai Hà Nội', 0),
-('Admin', 'admin@gmai.com', '123456789', '1122334455', '1985-01-01', 'Nu','25/41/292 Kim Giang Hoàng Mai Hà Nội', 1);
+('Admin', 'admin@gmail.com', '123456789', '1122334455', '1985-01-01', 'Nu','25/41/292 Kim Giang Hoàng Mai Hà Nội', 1);
  
 INSERT INTO Books (title, author, description, price, image_url, publication_date, category,level_class,level_school, stock_quantity, publisher)
 VALUES 
@@ -14,17 +14,6 @@ VALUES
 ('Công Nghệ 7', 'Bộ Giáo dục và Đào tạo Việt Nam', 'Sách giáo khoa Công Nghệ lớp 7, cung cấp các kiến thức về nông nghiệp và công nghiệp cơ bản.', 20.000, 'https://hocvuighe.com/wp-content/uploads/2022/04/1_Congnghe7_25_03_2022_v12-730x1024.jpg', '2024-01-01', 'Công nghệ','7','Trung học cơ sở', 70, 'Nhà Xuất Bản Giáo Dục Việt Nam');
 
 
--- INSERT INTO Orders (user_id, order_date, status, total_price, shipping_address, payment_method, payment_status, shipping_date, delivery_date)
--- VALUES 
--- (1, '2024-11-25', 'Pending', 21.98, '123 Main Street, Springfield', 'Credit Card', 'Paid', '2024-11-26', NULL),
--- (2, '2024-11-24', 'Shipped', 12.99, '456 Elm Street, Shelbyville', 'Cash on Delivery', 'Unpaid', '2024-11-25', '2024-11-26');
-
--- INSERT INTO Order_Items (order_id, book_id, quantity, price_per_item, total_price)
--- VALUES 
--- (1, 1, 1, 10.99, 10.99),
--- (1, 2, 1, 9.99, 9.99),
--- (2, 3, 1, 12.99, 12.99);
-
 INSERT INTO Carts (user_id, quantity, total_amount)
 VALUES 
 ( 1, 2, 500000),
@@ -33,7 +22,7 @@ insert into Orders
 (user_id,recipient_name,recipient_phone,recipient_email,shipping_address,payment_method,payment_status,total_price)
 values 
 (1,"Khanh",0345755059,"khanhdeddo@gmail.com","Ha noi","Thanh toan khi nhan hang","Chua thanh toan",9000000),
-(2,"Khanh",0345755059,"khanhdeddo@gmail.com","Ha noi","Thanh toan khi nhan hang","Chua thanh toan",9000000);
+(2,"Admin",0345755059,"khanhdeddo@gmail.com","Ha noi","Thanh toan khi nhan hang","Chua thanh toan",9000000);
 
 insert into Order_Items
 (order_id,book_id,quantity,price_per_item,total_price)
