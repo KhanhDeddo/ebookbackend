@@ -341,10 +341,10 @@ def create_order():
         return jsonify({"error": f"Failed to create cart: {str(e)}"}), 400
 # -------------------------------------------------------------------------------------
 # Route để Cập nhật đơn hàng
-@api_bp.route('/orders/<int:cart_id>', methods=['PUT'])
-def update_order(cart_id):
+@api_bp.route('/orders/<int:order_id>', methods=['PUT'])
+def update_order(order_id):
     data = request.get_json()
-    order = Order.query.get(cart_id)
+    order = Order.query.get(order_id)
     if not order:
         return jsonify({"error": "Cart not found"}), 404
 
