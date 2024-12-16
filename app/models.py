@@ -28,9 +28,10 @@ class Book(db.Model):
     __tablename__ = 'Books'  # Đảm bảo bảng có tên đúng trong DB
     book_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(100), nullable=False)
+    status_book = db.Column(db.String(100), nullable=False)
     author = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
-    price = db.Column(db.Numeric(10, 3), nullable=False)
+    price = db.Column(db.Integer, nullable=False)
     image_url = db.Column(db.String(255))  # URL của ảnh sách (nếu có)
     publication_date = db.Column(db.Date)  # Xóa dấu phẩy
     category = db.Column(db.String(100), nullable=False)  # Xóa dấu phẩy
@@ -49,9 +50,10 @@ class Book(db.Model):
         return {
             "id": self.book_id,
             "title": self.title,
+            "status_book":self.status_book,
             "author": self.author,
             "description": self.description,
-            "price": str(self.price),  # Chuyển thành string để JSON hóa
+            "price": (self.price), 
             "image_url": self.image_url,
             "publication_date": self.publication_date,
             "category": self.category,
@@ -70,7 +72,7 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('Users.user_id'), nullable=False)  # Đảm bảo tên bảng là 'Users'
     order_date = db.Column(db.DateTime, default=db.func.current_timestamp())
     status = db.Column(db.String(100), nullable=False)
-    total_price = db.Column(db.Numeric(10, 3), nullable=False)
+    total_price = db.Column(db.Integer, nullable=False)
     recipient_name = db.Column(db.Text, nullable=False)
     recipient_phone = db.Column(db.Text, nullable=False)
     recipient_email = db.Column(db.Text, nullable=False)
@@ -88,7 +90,7 @@ class Order(db.Model):
             "user_id": self.user_id,
             "order_date": self.order_date,
             "status": self.status,
-            "total_price": str(self.total_price),
+            "total_price": (self.total_price),
             "recipient_name": self.recipient_name,
             "recipient_phone": self.recipient_phone,
             "recipient_email": self.recipient_email,
@@ -119,8 +121,8 @@ class OrderItem(db.Model):
             "order_id": self.order_id,
             "book_id": self.book_id,
             "quantity": self.quantity,
-            "price_per_item": str(self.price_per_item),
-            "total_price": str(self.total_price)
+            "price_per_item": (self.price_per_item),
+            "total_price": (self.total_price)
         }
 
 class Cart(db.Model):
@@ -143,7 +145,7 @@ class CartItem(db.Model):
     cart_id = db.Column(db.Integer, db.ForeignKey('Carts.cart_id'), primary_key=True)  # Khóa chính
     book_id = db.Column(db.Integer, db.ForeignKey('Books.book_id'), primary_key=True)  # Khóa chính
     quantity = db.Column(db.Integer, nullable=False, default=1)  # Số lượng sách trong giỏ
-    price_at_purchase = db.Column(db.Numeric(10, 3), nullable=False)
+    price_at_purchase = db.Column(db.Integer, nullable=False)
     added_at = db.Column(db.DateTime, default=db.func.current_timestamp())  # Thời gian thêm vào giỏ
 
     # Mối quan hệ với bảng Cart và Book
@@ -155,7 +157,7 @@ class CartItem(db.Model):
             "cart_id": self.cart_id,
             "book_id": self.book_id,
             "quantity": self.quantity,
-            "price_at_purchase":str(self.price_at_purchase),
+            "price_at_purchase":(self.price_at_purchase),
             "added_at": self.added_at
         }
 

@@ -164,6 +164,7 @@ def update_book():
     try:
         # Cập nhật thông tin sách
         book.title = data.get('title', book.title)
+        book.status_book = data.get('status_book', book.status_book)
         book.author = data.get('author', book.author)
         book.description = data.get('description', book.description)
         book.price = data.get('price', book.price)

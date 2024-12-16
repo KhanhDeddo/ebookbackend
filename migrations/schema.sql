@@ -15,9 +15,10 @@ DROP TABLE IF EXISTS Books;
 CREATE TABLE Books (
     book_id INTEGER PRIMARY KEY AUTOINCREMENT,        -- Mã sách (khóa chính, tự động tăng)
     title TEXT NOT NULL,                              -- Tiêu đề sách
+    status_book TEXT NOT NULL,                        -- Trang thái
     author TEXT NOT NULL,                             -- Tác giả
     description TEXT,                                 -- Mô tả sách
-    price DECIMAL(10, 3) NOT NULL,                    -- Giá sách
+    price INTEGER NOT NULL,                           -- Giá sách
     image_url TEXT,                                   -- URL (hình ảnh hoặc sách điện tử)
     publication_date DATE,                            -- Ngày xuất bản
     category TEXT NOT NULL,                           -- Thể loại sách
@@ -35,7 +36,7 @@ CREATE TABLE Orders (
     user_id INTEGER NOT NULL,                           -- Mã người dùng (khóa ngoại)
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,     -- Ngày đặt hàng
     status TEXT NOT NULL DEFAULT 'Chờ xác nhận',        -- Trạng thái đơn hàng
-    total_price DECIMAL(10, 3) NOT NULL,                -- Tổng giá trị đơn hàng
+    total_price INTEGER NOT NULL,                -- Tổng giá trị đơn hàng
     recipient_name TEXT NOT NULL,                       -- Tên người nhận
     recipient_phone TEXT NOT NULL,                      -- Số điện thoại người nhận 
     recipient_email TEXT NOT NULL,                      -- Email người nhận
@@ -54,8 +55,8 @@ CREATE TABLE Order_Items (
     order_id INTEGER NOT NULL,                          -- Mã đơn hàng (khóa phụ)
     book_id INTEGER NOT NULL,                           -- Mã sản phẩm (khóa phụ)
     quantity INTEGER NOT NULL,                          -- Số lượng sản phẩm
-    price_per_item DECIMAL(10, 3),                      -- Giá mỗi sản phẩm
-    total_price DECIMAL(10, 3) NOT NULL,                -- Tổng giá trị của mục này (quantity * price_per_item)
+    price_per_item INTEGER,                      -- Giá mỗi sản phẩm
+    total_price INTEGER NOT NULL,                -- Tổng giá trị của mục này (quantity * price_per_item)
     PRIMARY KEY (order_id, book_id),                    -- Đặt order_id và book_id làm khóa chính
     FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON DELETE CASCADE,
     FOREIGN KEY (book_id) REFERENCES Books(book_id) ON DELETE CASCADE
@@ -66,7 +67,7 @@ CREATE TABLE Carts (
     cart_id INTEGER PRIMARY KEY AUTOINCREMENT,          -- Mã giỏ hàng
     user_id INTEGER NOT NULL UNIQUE,                    -- Mã người dùng (khóa ngoại, đảm bảo mỗi user chỉ có một giỏ hàng)
     quantity INTEGER NOT NULL DEFAULT 0,                -- Số lượng sách trong giỏ
-    total_amount DECIMAL(10, 3) NOT NULL DEFAULT 0,     -- Tổng tiền trong giỏ
+    total_amount INTEGER NOT NULL DEFAULT 0,     -- Tổng tiền trong giỏ
     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
 );
 
@@ -75,7 +76,7 @@ CREATE TABLE Cart_Items (
     cart_id INTEGER NOT NULL,                           -- Mã giỏ hàng (khóa ngoại)
     book_id INTEGER NOT NULL,                           -- Mã sách (khóa ngoại)
     quantity INTEGER NOT NULL DEFAULT 1,                -- Số lượng sách trong giỏ
-    price_at_purchase DECIMAL(10, 3) NOT NULL,          -- Giá tại thời điểm thêm
+    price_at_purchase INTEGER NOT NULL,          -- Giá tại thời điểm thêm
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,       -- Ngày giờ thêm sách vào giỏ
     PRIMARY KEY (cart_id, book_id),                     -- Khóa chính
     FOREIGN KEY (cart_id) REFERENCES Carts(cart_id) ON DELETE CASCADE,

@@ -118,6 +118,7 @@ def create_book():
         # Tạo đối tượng sách mới
         new_book = Book(
             title=data['title'],
+            status_book = ["status_book"],
             author=data['author'],
             description=data.get('description', ''),
             price=data['price'],
@@ -145,6 +146,7 @@ def update_book(book_id):
     try:
         # Cập nhật thông tin sách
         book.title = data.get('title', book.title)
+        book.status_book = data.get('status_book',book.status_book)
         book.author = data.get('author', book.author)
         book.description = data.get('description', book.description)
         book.price = data.get('price', book.price)
