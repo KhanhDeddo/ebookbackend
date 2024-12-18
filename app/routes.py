@@ -118,7 +118,7 @@ def create_book():
         # Tạo đối tượng sách mới
         new_book = Book(
             title=data['title'],
-            status_book = ["status_book"],
+            status_book = data["status_book"],
             author=data['author'],
             description=data.get('description', ''),
             price=data['price'],
@@ -352,6 +352,7 @@ def update_order(order_id):
 
     try:
         order.status = data.get('status', order.status)
+        order.payment_status = data.get('payment_status', order.payment_status)
         db.session.commit()
         return jsonify(order.to_dict()), 200
     except Exception as e:
